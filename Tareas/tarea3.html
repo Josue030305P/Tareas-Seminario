@@ -51,7 +51,7 @@ function draw() {
     // Calculate the pinch "distance" between finger and thumb
     let pinch = dist(finger.x, finger.y, thumb.x, thumb.y);
 
-    let color = pinch < 200 ? 'red' : pinch < 300 ? 'orange' : 'yellow';
+    let color = pinch < 100 ? 'red' : pinch < 285    ? 'orange' : 'yellow';
 
 
       fill(color);
