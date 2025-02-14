@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <!-- CDN PARA GESTIÓN DE OBJETOS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
+  <!-- CDN PARA ML -->
+  <script src="https://unpkg.com/ml5@1/dist/ml5.min.js"></script>
+</head>
+<body>
+
+  <style>
+    body {
+      background: antiquewhite;
+    }
+  </style>
+
+
+
+  <script>
+
+    // Objetos
+    let classifier;
+    let video;
+    let etiqueta = '';
+
+
+    function preload() {
+      classifier = ml5.imageClassifier('MobileNet')
+    }
+
+    function setup() {
+      createCanvas(640,480);
+      background(255);
+
+      // Detección y gestión de video
+
+      video = createCapture(VIDEO)
+      video.size(640,480);
+      video.hide();
+      classifier.classifyStart(video, gotResult);
+
+
+    }
+
+    function draw() {
+      // Para cada frame/ cuadro detectado, renderizamos en el canva
+      image(video,0,0)
+
+      // Configuramos estilo texto canvas
+      fill(255);
+      textSize(32);
+      text(etiqueta, 20, 40);
+    
+    }
+
+    function gotResult(results) {
+      // console.log(results[0].label);
+      etiqueta = results[0].label;
+    }
+ 
+
+
+
+  </script>
+  
+</body>
+</html>

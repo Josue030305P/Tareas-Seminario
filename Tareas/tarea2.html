@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teachable Machine Image Model</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine.min.js"></script>
+</head>
+<body>
+  <div>Teachable Machine Image Model</div>
+  <button type="button" onclick="init()">Start</button>
+  <div id="webcam-container"></div>
+  <div id="label-container"></div>
+
+  <script type="text/javascript">
+    const URL = "../Model/";
+
+    let model, webcam, labelContainer, maxPredictions;
+
+    async function init() {
+        console.log("init called");
+        const modelURL = URL + "model.json";
+        const metadataURL = URL + "metadata.json";
+
+        console.log("Loading model from:", modelURL);
+        try {
+            model = await tmImage.load(modelURL, metadataURL);
+            console.log("Model loaded:", model);
+        } catch (error) {
+            console.error("Error loading model:", error);
+            return;
+        }
+
+        maxPredictions = model.getTotalClasses();
+        console.log("Total classes:", maxPredictions);
+
+        console.log("Setting up webcam...");
+        webcam = new tmImage.Webcam(200, 200, true); // width, height, flip
+        try {
+            await webcam.setup();
+            await webcam.play();
+            console.log("Webcam setup:", webcam);
+        } catch (error) {
+            console.error("Error setting up webcam:", error);
+            return;
+        }
+
+        window.requestAnimationFrame(loop);
+
+        document.getElementById("webcam-container").appendChild(webcam.canvas);
+        labelContainer = document.getElementById("label-container");
+        for (let i = 0; i < maxPredictions; i++) {
+            labelContainer.appendChild(document.createElement("div"));
+        }
+    }
+
+    async function loop() {
+        webcam.update();
+        await predict();
+        window.requestAnimationFrame(loop);
+    }
+
+    async function predict() {
+        if (!model) {
+            console.error("Model not loaded");
+            return;
+        }
+        const prediction = await model.predict(webcam.canvas);
+        for (let i = 0; i < maxPredictions; i++) {
+            const classPrediction =
+                prediction[i].className + ": " + prediction[i].probability.toFixed(2);
+            labelContainer.childNodes[i].innerHTML = classPrediction;
+        }
+    }
+  </script>
+</body>
+</html>

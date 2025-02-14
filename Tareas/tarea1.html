@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reconocimiento de imágenes</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- CDN PARA GESTIÓN DE OBJETOS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
+  <!-- CDN PARA ML -->
+  <script src="https://unpkg.com/ml5@1/dist/ml5.min.js"></script>
+  <style>
+    
+    .progress {
+      height: 30px;
+      margin-top: 10px;
+    }
+    .progress-bar {
+      font-size: 16px;
+      line-height: 30px;
+    }
+    .img-thumbnail {
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .img-thumbnail:hover {
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body class="bg-light">
+  <div class="container py-5">
+    <h1 class="text-center mb-4">Reconocimiento de Imágenes</h1>
+    <div class="row justify-content-center">
+      <div class="col-md-8 text-center">
+        <!-- Imágenes -->
+        <div class="images mb-4">
+          <img src="../images/animal1.jpg" alt="imagen1" id="img1" class="img-thumbnail me-2" width="100">
+          <img src="../images/animal2.jpg" alt="imagen2" id="img2" class="img-thumbnail me-2" width="100">
+          <img src="../images/animal3.jpg" alt="imagen3" id="img3" class="img-thumbnail" width="100">
+        </div>
+
+    
+
+        <!-- Formulario -->
+        <form class="mt-4">
+          <div class="mb-3">
+            <input type="text" class="form-control" placeholder="Descripción" id="descripcion" readonly>
+          </div>
+          <div class="progress">
+            <div id="barra-progreso" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Obteniendo las imágenes y los campos de formulario
+    const img1 = document.getElementById('img1');
+    const img2 = document.getElementById('img2');
+    const img3 = document.getElementById('img3');
+    const barraProgreso = document.getElementById('barra-progreso');
+    const inputDescripcion = document.getElementById('descripcion');
+
+    // Paso 1: Objetos requeridos
+    let classifier; // A través del modelo el reconocimiento de imágenes
+    let img; // Referencia al archivo físico jpg
+    let etiqueta = ''; // Texto que describe la imágen identificada  
+    let confianza = 0; // Valor confianza (0-1)
+
+    // PASO 2: Método que carga configuraciones generales
+    function preload() {
+      // Referencia al modelo ya entrenado
+      classifier = ml5.imageClassifier("MobileNet");
+    }
+
+    // PASO 3: Método que construye objetos
+    function setup() {
+      // Creamos canvas (Lienzo donde podemos dibujar) - Ancho, Alto
+      const canvas = createCanvas(800, 400);
+     
+      background(255); // Fondo blanco para el canvas
+    }
+
+    // Función para manejar el clic en las imágenes
+    function handleImageClick(clickedImg) {
+      // Convertir el elemento <img> en un objeto p5.Image
+      img = loadImage(clickedImg.src, () => {
+        // Limpiar el canvas antes de mostrar la nueva imagen
+        clear();
+        background(255); // Fondo blanco
+        // Mostrar la imagen en el canvas
+        image(img, 0, 0, width, height);
+        // Clasificar la imagen
+        classifier.classify(img, gotResult);
+      }, () => {
+        console.error("Error al cargar la imagen.");
+      });
+    }
+
+    // Asignar eventos de clic a las imágenes
+    img1.addEventListener('click', () => handleImageClick(img1));
+    img2.addEventListener('click', () => handleImageClick(img2));
+    img3.addEventListener('click', () => handleImageClick(img3));
+
+    // PASO 4: Método que procesa el resultado (Valor obtenido del modelo)
+    function gotResult(results) {
+      console.log(results);
+
+      // Confianza en porcentaje
+      const porcentaje = (results[0].confidence * 100).toFixed(2);
+      
+      // Asignando datos a las variables
+      etiqueta = "Animal: " + results[0].label;
+      confianza = "Confianza: " + porcentaje + "%";
+
+      // Mostrar el valor de las variables en el canvas
+      fill(0); // Color de la fuente
+      stroke(255); // Borde
+      textSize(18); // Tamaño fuente
+      text(etiqueta, 10, 360);
+      text(confianza, 10, 380);
+
+      // Actualizar los campos del formulario
+      inputDescripcion.value = etiqueta;
+      barraProgreso.style.width = porcentaje + '%';
+      barraProgreso.textContent = porcentaje + '%';
+      barraProgreso.setAttribute('aria-valuenow', porcentaje);
+    }
+  </script>
+
+</body>
+</html>

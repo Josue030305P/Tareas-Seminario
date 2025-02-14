@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reconocimiento de imágenes</title>
+  <!-- CDN PARA GESTIÓN DE OBJETOS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
+  <!-- CDN PARA ML -->
+  <script src="https://unpkg.com/ml5@1/dist/ml5.min.js"></script>
+</head>
+<body>
+ 
+  <script>
+    // Paso 1: Objetos requeridos
+    let classifer; // A tráves del modelo el reconocimiento de imágenes
+    let img; // Referencia al archjivo fisico jpg
+    let etiqueta = ''; // Texto que describe la imágen identificada  
+    let confianza = 0; // Valor confianza (0-1)
+
+
+    // PASO 2: Método que carga configuraciones generales
+
+    function preload() {
+        // Referencia al modelo ya entrenado
+        classifer = ml5.imageClassifier("MobileNet");
+        // Referencia al archivo físico
+        img = loadImage("images/animal4.jpg");
+
+    }
+
+    // PASO 3: Método que construye objetos
+    function setup() {
+      //Creamos canvas (Lienzo donde podemos dibujar) - Ancho, ALto
+      createCanvas(400,400)
+      //Ejecutar el proceso de clasificación(INPUT, OUTPUT)
+      classifer.classify(img,gotResult);
+      // Permite visualizar la imágen en el canvas
+      image(img,0,0,width,height);
+  
+    }
+
+    // PASO 4: Método que procesa el resultado (Valor obtenido dle modleo)
+
+    function gotResult(results) {
+      console.log(results);
+
+      // Gestión de resultados
+      fill(255); // Color de la fuente
+      stroke(0) // Borde
+      textSize(18) // tAMAÑO FUENTE
+
+      // Confianza en porcentaje
+      const procentaje = (results[0].confidence * 100).toFixed(2);
+      
+      // Asignando datos a las variables
+      etiqueta = "Animal: " + results[0].label;
+      // confianza = "Confianza: " + nf(results[0].confidence,0,2);
+      confianza = "Confianza: " + procentaje + "%";
+
+      // mostrar el valor de la svariables en el canva
+      text(etiqueta, 10, 360);
+      text(confianza, 10, 380)
+
+    }
+  
+  </script>
+
+</body>
+</html>
